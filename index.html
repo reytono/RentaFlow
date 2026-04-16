@@ -1,0 +1,921 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RentaFlow — Gestión de Alquileres [v2.4]</title>
+<meta name="description" content="RentaFlow - Sistema de gestión de alquileres temporarios">
+<meta name="theme-color" content="#0f0e0c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<button id="scrollEdgeLeft"  class="scroll-edge-btn" onclick="scrollGrid(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:50%;height:50%;pointer-events:none"><polyline points="15 18 9 12 15 6"/></svg></button>
+<button id="scrollEdgeRight" class="scroll-edge-btn" onclick="scrollGrid(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:50%;height:50%;pointer-events:none"><polyline points="9 18 15 12 9 6"/></svg></button>
+<div id="deptosScrollDock" class="deptos-scroll-dock">
+  <button class="deptos-scroll-arrow" onclick="scrollGrid(-1)" aria-label="Mover a la izquierda">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <input id="deptosScrollRange" class="deptos-scroll-range" type="range" min="0" max="1000" value="0" step="1" aria-label="Desplazamiento de departamentos">
+  <button class="deptos-scroll-arrow" onclick="scrollGrid(1)" aria-label="Mover a la derecha">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div id="mobileZoomBtns" style="display:none;gap:6px">
+    <button onclick="setMobileZoom('normal')" id="mzBtnNormal"
+      style="width:36px;height:36px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:0.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.5);transition:all 0.15s">1</button>
+    <button onclick="setMobileZoom('mini')" id="mzBtnMini"
+      style="width:36px;height:36px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:0.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.5);transition:all 0.15s">3</button>
+  </div>
+</div>
+<button id="zoomToggleBtn" onclick="toggleZoomMode()" title="Ampliar vista">+</button>
+<header>
+<div style="display:flex;flex-direction:column;gap:1px">
+<div class="logo">Renta<span>Flow</span></div>
+<div style="display:flex;align-items:center;gap:6px">
+<div id="fechaHoy" style="font-size:0.68rem;color:var(--text3);letter-spacing:0.02em"></div>
+<div id="buildStampWrap" style="font-size:0.6rem;color:var(--text3);opacity:0.6;letter-spacing:0.02em" title="Última edición del archivo">⚙ generado: <span id="buildStamp">—</span></div>
+
+<span id="currentUserBadge" style="font-size:0.65rem;color:var(--gold);background:var(--gold-dim);padding:1px 7px;border-radius:8px;font-weight:600;display:none"></span>
+</div>
+</div>
+<nav class="nav-tabs">
+<button class="nav-tab active" id="navDeptos" onclick="switchPage('deptos', this)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+Departamentos
+</button>
+<button class="nav-tab" id="navAgenda" onclick="switchPage('agenda', this)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+Calendario
+</button>
+<button class="nav-tab" id="navControl" onclick="switchPage('control', this)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+Control
+</button>
+<button class="nav-tab" id="navEstadistica" onclick="switchPage('estadistica', this)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+Estadística
+</button>
+<button class="nav-tab" id="navGastos" onclick="switchPage('gastos', this)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+Gastos
+</button>
+<button class="nav-tab" id="navTemp" onclick="switchPage('temp', this)" style="position:relative">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+Temp
+<span id="tempBadge" style="display:none;position:absolute;top:2px;right:2px;background:var(--orange);color:#000;font-size:0.55rem;font-weight:800;border-radius:8px;padding:1px 5px;line-height:1.4"></span>
+</button>
+</nav>
+<div class="header-actions">
+<button id="btnModo" onclick="toggleModo()" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:6px;font-size:0.78rem" title="Cambiar modo claro/oscuro">
+  <span id="modoIcon">☀️</span>
+  <span id="modoLabel">Modo claro</span>
+</button>
+<button class="btn btn-ghost" onclick="openModal('modalApto')">+ Departamento</button>
+<button class="btn btn-gold" onclick="nuevaReservaParaApto(0, true)">+ Reserva</button>
+</div>
+</header>
+<div id="overlapNoticeStack" class="overlap-notice-stack"></div>
+<div class="stats-bar" id="statsBar"></div>
+<div class="page active" id="pageDeptos">
+<main>
+<div class="section-header">
+<div id="deptoHeaderRow" style="display:flex;align-items:center;gap:10px">
+<div class="section-title">Departamentos</div>
+<button class="btn btn-ghost btn-sm" onclick="abrirModalNota()" style="font-size:0.78rem;display:flex;align-items:center;gap:5px">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
++ Nota
+</button>
+<div style="position:relative">
+<button class="btn btn-ghost btn-sm" id="btnFiltroUsuario" onclick="toggleFiltroUsuario()" style="font-size:0.78rem;display:flex;align-items:center;gap:5px">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+<span id="filtroUsuarioLabel">Filtrar por usuario</span>
+</button>
+<div id="filtroUsuarioMenu" style="display:none;position:absolute;left:0;top:110%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:200;padding:6px"></div>
+</div>
+<div id="buscarDeptoWrap" class="search-input-wrap">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:9px;color:var(--text3);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<input id="buscarDepto" type="text" placeholder="Buscar por texto…"
+oninput="persistDeptoFilters();renderGrid();document.getElementById('buscarDeptoX').style.display=this.value?'block':'none'"
+style="padding:5px 28px 5px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;outline:none;transition:border-color 0.15s;width:100%"
+onfocus="this.style.borderColor='var(--border2)'" onblur="this.style.borderColor='var(--border)'">
+<button onclick="document.getElementById('buscarDepto').value='';persistDeptoFilters();renderGrid();this.style.display='none'" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:0.75rem;padding:2px;line-height:1;display:none" id="buscarDeptoX" title="Limpiar">✕</button>
+</div>
+<button id="btnPendientes" onclick="abrirPendientes()" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:6px;font-size:0.78rem" title="Ver pendientes">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <span class="btn-label-desktop">Pendientes</span><span class="btn-label-mobile" style="display:none">P</span>
+</button>
+<button class="btn btn-ghost btn-sm depto-desktop-only" onclick="switchPage('temp',document.getElementById('navTemp'));setTimeout(function(){var p=document.getElementById('libresPanel');if(p){p.style.display='block';var d=document.getElementById('libresDesde');var h=document.getElementById('libresHasta');var t=new Date();var pad=function(n){return String(n).padStart(2,'0')};if(d&&!d.value)d.value=t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());if(h&&!h.value){var tm=new Date(t);tm.setDate(tm.getDate()+1);h.value=tm.getFullYear()+'-'+pad(tm.getMonth()+1)+'-'+pad(tm.getDate());}}},200)" style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:#7ab0eb;border-color:rgba(74,133,190,0.28);background:rgba(74,133,190,0.08)" title="Buscar departamentos libres">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  Libres
+</button>
+<button class="btn btn-ghost btn-sm depto-desktop-only" onclick="switchPage('temp',document.getElementById('navTemp'));setTimeout(function(){openModal('modalBooking');},200)" style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:#b07ee8;border-color:rgba(146,95,224,0.28);background:rgba(146,95,224,0.08)" title="Importar de Booking">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  Booking
+</button>
+</div>
+<div class="apartments-viewport" id="aptsViewport">
+<div class="apartments-grid" id="aptsGrid"></div>
+</div>
+</main>
+</div>
+<div class="page" id="pageAgenda">
+<div class="agenda-wrap">
+<div class="agenda-controls">
+<div class="month-nav">
+<button class="month-btn" onclick="changeMonth(-1)">&#8249;</button>
+<div class="month-label" id="agendaMonthLabel">—</div>
+        <div id="agendaAdminLegend" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:0.72rem"></div>
+<button class="month-btn" onclick="changeMonth(1)">&#8250;</button>
+</div>
+<button class="btn btn-ghost btn-sm" onclick="goToday()">Hoy</button>
+<button class="btn btn-gold" onclick="abrirHojaDia()" style="display:flex;align-items:center;gap:6px;padding:10px 20px;font-size:0.9rem;font-weight:700">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+Limpiezas
+</button>
+<button class="btn btn-ghost" onclick="abrirHojaImpagos()" style="display:flex;align-items:center;gap:6px;padding:10px 20px;font-size:0.9rem;font-weight:700">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/></svg>
+Impagos ingresados
+</button>
+<button class="btn btn-ghost" onclick="abrirAgendaClientes()" style="display:flex;align-items:center;gap:6px;padding:10px 20px;font-size:0.9rem;font-weight:700">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+Agenda
+</button>
+<div style="flex:1"></div>
+<div class="agenda-filter-tabs">
+<button class="tab active" onclick="filterAgenda('todos',this)">Todos</button>
+<button class="tab" onclick="filterAgenda('entrada',this)">Entradas</button>
+<button class="tab" onclick="filterAgenda('salida',this)">Salidas</button>
+</div>
+</div>
+<div class="month-summary" id="agendaSummary"></div>
+<div id="agendaContent"></div>
+</div>
+</div>
+<div class="page" id="pageControl">
+<div class="agenda-wrap">
+<div class="control-grid" style="display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:24px;max-width:1280px;align-items:start">
+<div id="usuariosSection">
+<div class="section-header" style="margin-bottom:14px">
+<div class="section-title">Usuarios</div>
+<button class="btn btn-gold btn-sm" onclick="abrirAddUsuario()">+ Agregar</button>
+</div>
+<div id="usuariosList"></div>
+<div id="addUsuarioForm" style="display:none;margin-top:12px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+<div>
+<label class="form-label">Nombre</label>
+<input class="form-input" type="text" id="nu_nombre" placeholder="Ej: Lucas">
+</div>
+<div>
+<label class="form-label">Rol</label>
+<select class="form-input" id="nu_rol">
+  <option value="">— Elegí un rol —</option>
+  <option value="Administrador">Administrador</option>
+  <option value="Colaborador">Colaborador</option>
+  <option value="Cobrador">Cobrador</option>
+</select>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+<div>
+<label class="form-label">Email</label>
+<input class="form-input" type="email" id="nu_email" placeholder="lucas@ejemplo.com">
+</div>
+<div>
+<label class="form-label">Teléfono (WhatsApp)</label>
+<input class="form-input" type="text" id="nu_telefono" placeholder="+54 11 1234-5678">
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+<div>
+<label class="form-label">Color</label>
+<input class="form-input" type="color" id="nu_color" value="#4a85be" style="height:42px;padding:6px">
+</div>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button class="btn btn-ghost btn-sm" onclick="cancelarAddUsuario()">Cancelar</button>
+<button class="btn btn-gold btn-sm" onclick="guardarUsuario()">✓ Agregar</button>
+</div>
+</div>
+</div>
+<div>
+<div class="section-header" style="margin-bottom:14px">
+<div class="section-title">Medios de pago</div>
+<button class="btn btn-gold btn-sm" onclick="abrirAddMedio()">+ Agregar</button>
+</div>
+<div id="mediosList"></div>
+<div id="addMedioForm" style="display:none;margin-top:12px">
+<div style="display:flex;gap:8px;align-items:flex-end">
+<div style="flex:1">
+<label class="form-label">Nombre</label>
+<input class="form-input" type="text" id="nm_nombre" placeholder="Ej: Cripto">
+</div>
+<button class="btn btn-gold btn-sm" onclick="guardarMedio()" style="flex-shrink:0;padding:10px 14px">✓</button>
+<button class="btn btn-ghost btn-sm" onclick="cancelarAddMedio()" style="flex-shrink:0;padding:10px 12px">✕</button>
+</div>
+</div>
+</div>
+<div>
+<div class="section-header" style="margin-bottom:14px">
+<div class="section-title">Tipo de gasto</div>
+<button class="btn btn-gold btn-sm" onclick="abrirAddTipoGasto()">+ Agregar</button>
+</div>
+<div id="tiposGastoList"></div>
+<div id="addTipoGastoForm" style="display:none;margin-top:12px">
+<div style="display:flex;gap:8px;align-items:flex-end">
+<div style="flex:1">
+<label class="form-label">Nombre</label>
+<input class="form-input" type="text" id="ntg_nombre" placeholder="Ej: Mantenimiento">
+</div>
+<button class="btn btn-gold btn-sm" onclick="guardarTipoGasto()" style="flex-shrink:0;padding:10px 14px">✓</button>
+<button class="btn btn-ghost btn-sm" onclick="cancelarAddTipoGasto()" style="flex-shrink:0;padding:10px 12px">✕</button>
+</div>
+</div>
+</div>
+<div style="margin-top:24px">
+<div class="section-header" style="margin-bottom:14px">
+<div class="section-title">Colores</div>
+</div>
+<div id="reservaColoresList"></div>
+</div>
+</div>
+</div>
+<div style="max-width:900px;margin-top:28px">
+<div class="section-header" style="margin-bottom:14px">
+<div class="section-title">Mensaje de WhatsApp</div>
+</div>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px">
+<label class="form-label" style="margin-bottom:8px">Escribí el mensaje — usá los campos para insertar datos de la reserva</label>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+<button class="wa-token-btn" onclick="insertarToken('{nombre}')">👤 Nombre</button>
+<button class="wa-token-btn" onclick="insertarToken('{checkin}')">📅 Check-in</button>
+<button class="wa-token-btn" onclick="insertarToken('{checkout}')">📅 Check-out</button>
+<button class="wa-token-btn" onclick="insertarToken('{depto}')">🏠 Depto</button>
+<button class="wa-token-btn" onclick="insertarToken('{noches}')">🌙 Noches</button>
+<button class="wa-token-btn" onclick="insertarToken('{monto}')">💰 Monto</button>
+</div>
+<textarea id="wa_mensaje" class="form-input" rows="5"
+style="resize:vertical;line-height:1.6;font-size:0.88rem;font-family:'DM Sans',sans-serif"
+oninput="guardarMensajeWA();actualizarPreviewWA()"
+placeholder="Ej: Hola {nombre}, tu reserva en {depto} es del {checkin} al {checkout}..."></textarea>
+<div style="margin-top:12px">
+<div style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;font-weight:600">Vista previa</div>
+<div id="wa_preview" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:0.85rem;color:var(--text2);line-height:1.5;white-space:pre-wrap;min-height:44px"></div>
+</div>
+<div style="font-size:0.7rem;color:var(--text3);margin-top:8px">Los campos entre llaves se reemplazan con los datos reales al enviar.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="pageEstadistica">
+<div class="agenda-wrap">
+<div class="section-header" style="margin-bottom:20px">
+<div class="section-title">Estadística — Reservas finalizadas</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<select class="form-input" id="stat_filtroApto" onchange="renderEstadistica()" style="width:auto;padding:6px 12px;font-size:0.8rem">
+<option value="">Todos los deptos</option>
+</select>
+<select class="form-input" id="stat_filtroMes" onchange="renderEstadistica()" style="width:auto;padding:6px 12px;font-size:0.8rem">
+<option value="">Todos los meses</option>
+</select>
+<button class="btn btn-ghost" onclick="abrirTablaResumen()" style="font-size:0.82rem;display:flex;align-items:center;gap:6px">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+Ingresos por depto
+</button>
+<button class="btn btn-ghost" onclick="abrirTablaDetalle()" style="font-size:0.82rem;display:flex;align-items:center;gap:6px">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+Resumen de reservas
+</button>
+<button class="btn btn-ghost" onclick="abrirTablaCobros()" style="font-size:0.82rem;display:flex;align-items:center;gap:6px">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+Cobros por usuario
+</button>
+</div>
+</div>
+<div class="month-summary" id="statSummary" style="margin-bottom:20px"></div>
+<div id="statList"></div>
+
+<!-- AGENDA DE CLIENTES -->
+<div style="margin-top:40px;border-top:2px solid var(--border);padding-top:20px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div class="section-title" style="flex-shrink:0">Agenda de Clientes</div>
+    <div style="position:relative;flex:1;max-width:320px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="agendaClientesBuscar" type="text" placeholder="Buscar por apellido o teléfono…"
+        oninput="renderAgendaClientes()"
+        style="width:100%;padding:6px 10px 6px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;transition:border-color 0.15s"
+        onfocus="this.style.borderColor='var(--border2)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+  </div>
+  </div>
+  <div id="agendaClientesList"></div>
+</div>
+
+<!-- LOG DE ACTIVIDAD -->
+<div style="margin-top:40px;border-top:2px solid var(--border);padding-top:28px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div class="section-title">Log de actividad</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="logFiltroUsuario" onchange="renderLogSeccion()" class="form-input" style="width:auto;padding:5px 10px;font-size:0.78rem">
+        <option value="">Todos los usuarios</option>
+      </select>
+      <input type="date" id="logFiltroFecha" onchange="renderLogSeccion()" class="form-input" style="padding:5px 10px;font-size:0.78rem;width:auto">
+      <button class="btn btn-ghost btn-sm" onclick="limpiarFiltrosLog()" style="font-size:0.75rem">Limpiar filtros</button>
+      <button class="btn btn-ghost btn-sm" onclick="limpiarLog()" style="font-size:0.75rem;color:var(--red);border-color:var(--red-dim)">Limpiar log</button>
+    </div>
+  </div>
+  <div id="logCount" style="font-size:0.72rem;color:var(--text3);margin-bottom:10px"></div>
+  <div id="logSeccionContent" style="font-size:0.82rem"></div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="page" id="pageGastos">
+<div class="agenda-wrap">
+<div class="section-header" style="margin-bottom:16px">
+<div class="section-title">Gastos</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<button class="btn btn-ghost btn-sm" onclick="abrirCierreGastos()" style="color:var(--orange);border-color:var(--orange-dim)">⟳ Cierre mensual</button>
+<button class="btn btn-gold" onclick="abrirModalGasto()">+ Gasto</button>
+</div>
+</div>
+<!-- Resumen de saldos -->
+<div id="gastosSaldos" style="margin-bottom:18px"></div>
+<!-- Lista de gastos por usuario -->
+<div id="gastosLista"></div>
+<div id="gastosCierresHistorial" style="margin-top:18px"></div>
+</div>
+</div>
+<!-- PAGE: Temp -->
+<div class="page" id="pageTemp">
+<div class="agenda-wrap">
+<div class="section-header" style="margin-bottom:16px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:nowrap;width:100%">
+  <div style="flex-shrink:0">
+    <div class="section-title">Reservas Temporales</div>
+    <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">Reservas sin departamento asignado aún</div>
+  </div>
+  <div id="tempToolbar" style="flex:1;min-width:0"></div>
+</div>
+</div>
+<div id="tempLista"></div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalAgendaClientes">
+<div class="modal" style="max-width:600px;width:95vw">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div>
+<div class="modal-title" style="font-size:1.1rem">Agenda de Clientes</div>
+<div style="font-size:0.72rem;color:var(--text3);margin-top:2px" id="agendaClientesCount">—</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="btn btn-gold btn-sm" onclick="abrirFormCliente()">+ Cliente</button>
+<button class="close-btn" onclick="closeModal('modalAgendaClientes')">✕</button>
+</div>
+</div>
+<input class="form-input" type="text" id="clienteSearch" placeholder="Buscar por nombre o teléfono…"
+oninput="renderAgendaClientesModal()" style="margin-bottom:14px">
+<div id="agendaClientesLista"></div>
+<div id="formClienteInline" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-top:12px">
+<div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px" id="formClienteTitulo">Nuevo Cliente</div>
+<input type="hidden" id="cli_id">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div class="form-group">
+<label class="form-label">Nombre <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<input class="form-input" type="text" id="cli_nombre" placeholder="Nombre completo">
+</div>
+<div class="form-group">
+<label class="form-label">Teléfono <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<input class="form-input" type="tel" id="cli_telefono" placeholder="+54 11 1234-5678">
+</div>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button class="btn btn-ghost btn-sm" onclick="cancelarFormCliente()">Cancelar</button>
+<button class="btn btn-gold btn-sm" onclick="guardarCliente()">✓ Guardar</button>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalGasto">
+<div class="modal" style="max-width:440px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div class="modal-title" id="modalGastoTitulo">Nuevo Gasto</div>
+<button class="close-btn" id="btnCerrarGasto" onclick="intentarCerrarGasto()">✕</button>
+</div>
+<input type="hidden" id="g_id">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div class="form-group">
+<label class="form-label">Fecha <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<input class="form-input" type="date" id="g_fecha">
+</div>
+<div class="form-group">
+<label class="form-label">Lo cargó <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<select class="form-input" id="g_usuario"></select>
+</div>
+</div>
+<div class="form-group" style="margin-bottom:10px">
+<label class="form-label">Concepto <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<input class="form-input" type="text" id="g_concepto" placeholder="Ej: Limpieza, reparación, compras…">
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div class="form-group">
+<label class="form-label">Monto <span style="color:#e05c5c;font-size:0.65rem;font-weight:700">OBL</span></label>
+<input class="form-input" type="text" inputmode="decimal" id="g_monto" placeholder="0"
+  onfocus="setGastoMontoRaw(this)"
+  onblur="setGastoMontoFormatted(this)">
+</div>
+<div class="form-group">
+<label class="form-label">Moneda</label>
+<select class="form-input" id="g_moneda" onchange="setGastoMontoFormatted(document.getElementById('g_monto'))">
+<option value="ARS">$ Pesos</option>
+<option value="USD">USD Dólares</option>
+</select>
+</div>
+</div>
+<div class="form-group" style="margin-bottom:10px">
+<label class="form-label">Categoría</label>
+<select class="form-input" id="g_categoria"></select>
+</div>
+<div class="form-group" style="margin-bottom:10px">
+<label class="form-label">¿Lo pagó otro? <span style="font-size:0.7rem;color:var(--text3);font-weight:400">(deuda personal)</span></label>
+<select class="form-input" id="g_pagadopor">
+<option value="">No — lo pagó quien lo cargó</option>
+</select>
+</div>
+<div class="form-group" style="margin-bottom:16px">
+<label class="form-label">Notas</label>
+<input class="form-input" type="text" id="g_notas" placeholder="Opcional…">
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="btnCancelarGasto" onclick="intentarCerrarGasto()">Cancelar</button>
+<button class="btn btn-gold" id="btnGuardarGasto" onclick="guardarGasto()">✓ Guardar</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalLog">
+<div class="modal" style="width:88vw;max-width:760px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div>
+<div class="modal-title" style="font-size:1.1rem">Log de actividad</div>
+<div style="font-size:0.72rem;color:var(--text3);margin-top:2px" id="logCount">—</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red-dim)" onclick="limpiarLog()">Limpiar</button>
+<button class="close-btn" onclick="closeModal('modalLog')">✕</button>
+</div>
+</div>
+<div id="logContent" style="max-height:60vh;overflow-y:auto"></div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalTabla">
+<div class="modal" style="width:95vw;max-width:960px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<div class="modal-title" style="font-size:1.1rem">Ingresos por depto</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaResumenContent','ingresos_por_depto','csv')">↓ CSV</button>
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaResumenContent','ingresos_por_depto','xls')">↓ XLS</button>
+<button class="close-btn" onclick="closeModal('modalTabla')">✕</button>
+</div>
+</div>
+<div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap">
+<div class="form-group" style="margin:0">
+<label class="form-label">Desde</label>
+<input class="form-input" type="date" id="tr_desde" onchange="generarTablaResumen()" style="padding:6px 10px;font-size:0.82rem">
+</div>
+<div class="form-group" style="margin:0">
+<label class="form-label">Hasta</label>
+<input class="form-input" type="date" id="tr_hasta" onchange="generarTablaResumen()" style="padding:6px 10px;font-size:0.82rem">
+</div>
+<button class="btn btn-gold btn-sm" onclick="generarTablaResumen()">Generar</button>
+</div>
+<div id="tablaResumenContent" style="overflow-x:auto"></div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalTablaDetalle">
+<div class="modal" style="width:92vw;max-width:920px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div class="modal-title" style="font-size:1.1rem">Resumen de reservas</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaDetalleContent','resumen_reservas','csv')">↓ CSV</button>
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaDetalleContent','resumen_reservas','xls')">↓ XLS</button>
+<button class="close-btn" onclick="closeModal('modalTablaDetalle')">✕</button>
+</div>
+</div>
+<div id="tablaDetalleContent" style="overflow-x:auto"></div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalCobros">
+<div class="modal" style="width:80vw;max-width:640px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div class="modal-title" style="font-size:1.1rem">Cobros por usuario</div>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaCobrosContent','cobros_por_usuario','csv')">↓ CSV</button>
+<button class="btn btn-ghost btn-sm" onclick="exportarTabla('tablaCobrosContent','cobros_por_usuario','xls')">↓ XLS</button>
+<button class="close-btn" onclick="closeModal('modalCobros')">✕</button>
+</div>
+</div>
+<div id="tablaCobrosContent" style="overflow-x:auto"></div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalNota">
+<div class="modal" style="max-width:400px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<div class="modal-title" style="font-size:1rem">Nueva nota</div>
+<button class="close-btn" onclick="closeModal('modalNota')">✕</button>
+</div>
+<div class="form-group">
+<label class="form-label">Departamento</label>
+<div style="position:relative" id="nota_apto_wrap">
+  <div id="nota_apto_display" class="form-input" tabindex="0" onclick="toggleSearchableDropdown('nota_apto')" style="cursor:pointer;padding-right:32px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:none">
+    Seleccioná un departamento
+  </div>
+  <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  <input type="hidden" id="nota_apto" value="">
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Texto</label>
+<textarea class="form-input" id="nota_texto" rows="3" placeholder="Ej: Llave en portería, revisar calefacción..." style="resize:vertical;line-height:1.5"></textarea>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" onclick="closeModal('modalNota')">Cancelar</button>
+<button class="btn btn-gold" onclick="guardarNota()">Agregar nota</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay modal-overlay-center" id="modalHojaDia">
+<div class="modal" style="width:88vw;max-width:680px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div style="display:flex;flex-direction:column;gap:6px">
+  <div class="modal-title" style="font-size:1.1rem" id="hojaDiaTitulo">Limpiezas</div>
+  <input type="date" id="hojaDiaFecha" class="form-input" style="width:160px;font-size:0.82rem;padding:5px 10px"
+    onchange="renderHojaDiaParaFecha(this.value)">
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<div style="position:relative">
+<button class="wa-btn" style="padding:6px 12px;font-size:0.78rem" onclick="toggleWaUserMenu()">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.556 4.118 1.528 5.845L.057 23.885a.5.5 0 0 0 .612.612l6.04-1.471A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.523-5.168-1.427l-.369-.22-3.827.931.949-3.722-.242-.383A9.955 9.955 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+Enviar por WA ▾
+</button>
+<div id="waUserMenu" style="display:none;position:absolute;right:0;top:110%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:600;padding:6px"></div>
+</div>
+<button class="close-btn" onclick="closeModal('modalHojaDia')">✕</button>
+</div>
+</div>
+<div id="hojaDiaContent"></div>
+</div>
+</div>
+<div class="modal-overlay" id="modalReserva">
+<div class="modal" style="max-width:580px;width:95vw">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="modal-title" id="modalReservaTitulo" style="font-size:1.15rem">Nueva Reserva</div>
+        <button class="btn btn-ghost btn-sm" onclick="abrirModalNota()" style="font-size:0.75rem;display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          + Nota
+        </button>
+      </div>
+      <div class="modal-sub" style="margin-top:2px;margin-bottom:0">Completá los datos de la reserva</div>
+    </div>
+    <button class="close-btn" tabindex="-1" onclick="intentarCerrarReserva()">✕</button>
+  </div>
+
+  <input type="hidden" id="r_id">
+  <input type="hidden" id="r_temporal">
+
+  <!-- BLOQUE 1: Depto + Huésped -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Departamento <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <div style="position:relative" id="r_apto_wrap">
+        <!-- Visible label (non-editable appearance) -->
+        <div id="r_apto_display" class="form-input" tabindex="0"
+          onclick="event.preventDefault();event.stopPropagation();toggleAptoDropdown();document.getElementById('r_apto_search').focus();"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAptoDropdown();document.getElementById('r_apto_search').focus();}"
+          style="width:100%;text-align:left;cursor:pointer;padding-right:32px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:none;position:relative">
+          Seleccioná un departamento
+          <!-- Invisible search input overlaid -->
+          <input id="r_apto_search" type="text" autocomplete="off"
+            oninput="aptoSearchFilter(this.value)"
+            onkeydown="aptoSearchKeydown(event)"
+            style="position:absolute;inset:0;width:100%;height:100%;opacity:0;border:none;background:transparent;cursor:pointer;font-size:inherit;padding:0;margin:0;outline:none">
+        </div>
+        <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <input type="hidden" id="r_apto" value="">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Huésped <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <div style="position:relative">
+        <input class="form-input" type="text" id="r_huesped" placeholder="Nombre completo" autocomplete="off"
+          oninput="renderReservaClienteSuggestions(this.value)"
+          onfocus="renderReservaClienteSuggestions(this.value)"
+          onblur="setTimeout(() => { autofillReservaClienteByName(this.value); hideReservaClienteSuggestions(); },120);validarCampo(this,'Ingresá el nombre del huésped')">
+        <div id="r_huesped_sugerencias" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 14px 32px rgba(0,0,0,0.45);z-index:120;padding:6px;max-height:220px;overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2: Fechas + Monto -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Check-in <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <input class="form-input" type="date" id="r_desde"
+        onblur="validarCampo(this,'Ingresá la fecha de check-in');validarFechas()">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Check-out <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <input class="form-input" type="date" id="r_hasta"
+        onblur="validarCampo(this,'Ingresá la fecha de check-out');validarFechas()">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Monto <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input class="form-input" type="text" inputmode="decimal" id="r_monto" placeholder="0"
+          onfocus="setMontoInputRaw(this)"
+          onblur="setMontoInputFormatted(this);validarCampo(this,'Ingresá el monto')">
+      </div>
+      <div id="r_deudaCampos" class="deuda-fields" style="display:none">
+        <input class="form-input" type="text" inputmode="decimal" id="r_deudaMonto" placeholder="Monto deuda"
+          onfocus="setMontoInputRaw(this)"
+          onblur="setMontoInputFormatted(this)"
+          style="font-size:1rem;padding:10px 14px">
+        <input class="form-input" type="text" id="r_deudaComentario" placeholder="Comentario deuda"
+          style="font-size:0.92rem;padding:10px 14px">
+      </div>
+      <div id="r_senaCampos" class="deuda-fields" style="display:none">
+        <input class="form-input" type="text" inputmode="decimal" id="r_senaMonto" placeholder="Monto seña"
+          onfocus="setMontoInputRaw(this)"
+          onblur="setMontoInputFormatted(this)"
+          style="font-size:1rem;padding:10px 14px">
+        <input class="form-input" type="text" id="r_senaComentario" placeholder="Comentario seña"
+          style="font-size:0.92rem;padding:10px 14px">
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 3: Teléfono + Nacionalidad + Huéspedes -->
+  <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Teléfono <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <div style="position:relative">
+        <input class="form-input" type="tel" id="r_contacto" placeholder="+54 11 1234-5678"
+          oninput="this.value=this.value.replace(/[^0-9+\s\-()]/g,'');renderReservaClientePhoneSuggestions(this.value)"
+          onfocus="renderReservaClientePhoneSuggestions(this.value)"
+          onblur="setTimeout(() => { autofillReservaClienteByPhone(this.value); hideReservaClienteSuggestions(); },120);validarCampo(this,'Ingresá el teléfono')">
+        <div id="r_contacto_sugerencias" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 14px 32px rgba(0,0,0,0.45);z-index:120;padding:6px;max-height:220px;overflow:auto"></div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Nacionalidad</label>
+      <input class="form-input" type="text" id="r_nacionalidad" placeholder="País de origen"
+        list="paises_list" autocomplete="off" onkeydown="nacAutocompletarTab(event,this)">
+      <datalist id="paises_list"></datalist>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Huéspedes <span style="color:#e05c5c;font-size:0.62rem;font-weight:700">OBL</span></label>
+      <select class="form-input" id="r_cantHuespedes" onchange="validarCampo(this,'Seleccioná la cantidad de huéspedes')" onkeydown="if(event.key==='Tab'&&!event.shiftKey){event.preventDefault();document.getElementById('r_hayDeuda').focus();}">
+        <option value="">—</option>
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="2S">2 sep.</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Botón guardar rápido -->
+  <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <label class="deuda-toggle deuda-toggle-deuda" for="r_hayDeuda" title="Hay una deuda pendiente">
+      <input type="checkbox" id="r_hayDeuda" onchange="toggleDebtFields('r_deudaCampos', this.checked);if(this.checked){document.getElementById('r_haySena').checked=false;toggleDebtFields('r_senaCampos',false)}">
+      <span>Deuda</span>
+    </label>
+    <label class="deuda-toggle deuda-toggle-sena" for="r_haySena" title="Se recibió una seña">
+      <input type="checkbox" id="r_haySena" onchange="toggleDebtFields('r_senaCampos', this.checked);if(this.checked){document.getElementById('r_hayDeuda').checked=false;toggleDebtFields('r_deudaCampos',false)}">
+      <span>Seña</span>
+    </label>
+    <div style="display:flex;gap:6px;align-items:flex-end;flex:1;min-width:0">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <label class="form-label" style="font-size:0.6rem;margin:0">Entrada</label>
+        <input class="form-input" type="text" inputmode="numeric" id="r_horarioEntrada" value="" placeholder="14:00" maxlength="5"
+          style="width:72px;padding:6px 8px;font-size:0.82rem"
+          onblur="setHoraInputFormatted(this,'')">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <label class="form-label" style="font-size:0.6rem;margin:0">Salida</label>
+        <input class="form-input" type="text" inputmode="numeric" id="r_horarioSalida" value="" placeholder="11:00" maxlength="5"
+          style="width:72px;padding:6px 8px;font-size:0.82rem"
+          onblur="setHoraInputFormatted(this,'')">
+      </div>
+    </div>
+    <button class="btn btn-gold" id="btnGuardarReservaRapido" onclick="guardarReserva()" style="min-width:140px">✓ Guardar reserva</button>
+  </div>
+
+  <div id="r_horarioCampos" style="margin-bottom:14px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Notas</label>
+      <textarea class="form-input" id="r_horarioNotas" rows="2" placeholder="Ej: llega después de las 20, salida flexible..." style="resize:vertical;line-height:1.45"></textarea>
+    </div>
+  </div>
+
+  <!-- Divisor campos adicionales -->
+  <div style="border-top:1px solid var(--border);margin:0 0 12px;position:relative">
+    <span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--card);padding:0 10px;font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap">Campos opcionales</span>
+  </div>
+
+  <!-- BLOQUE 4: Estado + Reserva de + Pago + Ingreso -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Estado</label>
+      <select class="form-input" id="r_estado">
+        <option value="confirmada">Confirmada</option>
+        <option value="pendiente" selected>Pendiente</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Reserva de</label>
+      <select class="form-input" id="r_reservaDe"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Pago</label>
+      <select class="form-input" id="r_pago">
+        <option value="false">Impago</option>
+        <option value="true">Pagado</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Ingreso</label>
+      <select class="form-input" id="r_ingreso">
+        <option value="false">Sin ingresar</option>
+        <option value="true">Ingresó</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- BLOQUE 5: Cobrador + Medio de pago -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Quién cobró</label>
+      <select class="form-input" id="r_cobrador"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Medio de pago</label>
+      <select class="form-input" id="r_medioPago"></select>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer" style="padding-top:12px;border-top:1px solid var(--border)">
+    <button class="btn btn-ghost" onclick="intentarCerrarReserva()">Cancelar</button>
+    <button class="btn btn-gold" id="btnGuardarReserva" onclick="guardarReserva()">Guardar Reserva</button>
+  </div>
+
+</div>
+</div>
+<div class="modal-overlay" id="modalApto">
+<div class="modal">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div>
+<div class="modal-title" id="modalAptoTitulo">Nuevo Departamento</div>
+<div class="modal-sub">Completá los datos del departamento</div>
+</div>
+<button class="close-btn" onclick="intentarCerrarApto()">✕</button>
+</div>
+<input type="hidden" id="a_id">
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">Nombre / Número <span style="color:#e05c5c;font-size:0.65rem;font-weight:700;letter-spacing:0.05em">OBL</span></label>
+<input class="form-input" type="text" id="a_nombre" placeholder="Ej: 3A, Suite Palermo…">
+</div>
+<div class="form-group">
+<label class="form-label">Encargado <span style="color:#e05c5c;font-size:0.65rem;font-weight:700;letter-spacing:0.05em">OBL</span></label>
+<select class="form-input" id="a_encargado">
+<option value="">Sin asignar</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Descripción</label>
+<input class="form-input" type="text" id="a_desc" placeholder="Ej: 2 ambientes, Palermo">
+</div>
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">Usuario WiFi</label>
+<input class="form-input" type="text" id="a_wifiUser" placeholder="Ej: Movistar_3A">
+</div>
+<div class="form-group">
+<label class="form-label">Clave WiFi</label>
+<input class="form-input" type="text" id="a_wifiPass" placeholder="Ej: clave1234">
+</div>
+</div>
+<div class="modal-footer" style="justify-content:space-between">
+<button class="btn btn-ghost" id="btnEliminarApto" style="display:none;color:var(--red);border-color:var(--red-dim)" onclick="eliminarApto()">Eliminar</button>
+<div style="display:flex;gap:10px">
+<button class="btn btn-ghost" onclick="intentarCerrarApto()">Cancelar</button>
+<button class="btn btn-gold" id="btnGuardarApto" onclick="guardarApto()">Agregar Departamento</button>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modalDetalle">
+<div class="modal" style="max-width:580px;width:95vw;padding:20px">
+<div id="detalleContent"></div>
+</div>
+</div>
+<div class="toast" id="toast"><span class="toast-icon" id="toastIcon">✓</span><span id="toastMsg"></span></div>
+<div class="modal-overlay modal-overlay-center" id="modalLogin" style="background:rgba(0,0,0,0.88)">
+<div class="modal" style="max-width:360px">
+<div style="text-align:center;margin-bottom:20px">
+<div class="logo" style="font-size:1.8rem;margin-bottom:4px">Renta<span>Flow</span></div>
+<div style="font-size:0.8rem;color:var(--text3)">¿Quién sos?</div>
+</div>
+<div id="loginUserList" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+</div>
+<script src="./supabase-config.js"></script>
+<script src="./app.js"></script>
+
+<!-- MODAL BOOKING -->
+<div class="modal-overlay" id="modalBooking">
+  <div class="modal" style="max-width:600px;width:95vw;max-height:95vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div>
+        <div class="modal-title" style="font-size:1.2rem">📋 Importar desde Booking</div>
+        <div class="modal-sub" style="margin-bottom:0">OCR local · tus datos no salen del navegador</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('modalBooking')">✕</button>
+    </div>
+
+    <!-- Drop zone -->
+    <div id="bkDropZone"
+      style="border:2px dashed var(--border2);border-radius:10px;margin:14px 0;cursor:pointer;transition:all 0.15s;overflow:hidden"
+      onclick="document.getElementById('bkFileInput').click()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='var(--gold-dim)'"
+      ondragleave="this.style.borderColor='var(--border2)';this.style.background=''"
+      ondrop="bkHandleDrop(event)">
+      <div id="bkEmpty" style="padding:28px;text-align:center">
+        <div style="font-size:1.8rem;margin-bottom:8px">📸</div>
+        <div style="font-size:0.88rem;font-weight:600;color:var(--text2)">Pegá con Ctrl+V, arrastrá o hacé click</div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:4px">Captura de pantalla de la reserva de Booking</div>
+      </div>
+      <div id="bkPreviewWrap" style="display:none">
+        <img id="bkPreviewImg" style="width:100%;max-height:240px;object-fit:contain;display:block;background:var(--bg3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-top:1px solid var(--border)">
+          <span id="bkPreviewName" style="font-size:0.75rem;color:var(--text3)">Imagen lista</span>
+          <button onclick="event.stopPropagation();document.getElementById('bkFileInput').click()" class="btn btn-ghost btn-sm" style="font-size:0.72rem;padding:3px 10px">Cambiar</button>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="bkFileInput" accept="image/*" style="display:none" onchange="bkLoadFile(this.files[0])">
+
+    <!-- Progress -->
+    <div id="bkProgressWrap" style="display:none;margin-bottom:10px">
+      <div style="height:3px;background:var(--border);border-radius:99px;overflow:hidden">
+        <div id="bkProgressBar" style="height:100%;background:var(--gold);border-radius:99px;width:0%;transition:width 0.3s"></div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="bkStatus" style="font-size:0.8rem;color:var(--text3);min-height:18px;margin-bottom:10px;text-align:center"></div>
+
+    <!-- Advertencia múltiples habitaciones -->
+    <div id="bkMultiHabWarn" style="display:none;background:var(--orange-dim);border:1px solid var(--orange);border-radius:8px;padding:10px 14px;font-size:0.82rem;color:var(--text);margin-bottom:10px;line-height:1.5"></div>
+
+    <!-- Campos extraídos -->
+    <div id="bkFields" style="display:none">
+      <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:10px">Datos extraídos — revisá antes de guardar</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="grid-column:1/-1"><label class="form-label">Huésped</label><input class="form-input" id="bk_huesped"></div>
+        <div><label class="form-label">Check-in</label><input class="form-input" type="date" id="bk_desde"></div>
+        <div><label class="form-label">Check-out</label><input class="form-input" type="date" id="bk_hasta"></div>
+        <div><label class="form-label">Monto</label><input class="form-input" type="number" id="bk_monto"></div>
+        <div><label class="form-label">Huéspedes</label><input class="form-input" type="number" id="bk_cant"></div>
+        <div><label class="form-label">Teléfono</label><input class="form-input" id="bk_contacto" placeholder="+54 11..."></div><div><label class="form-label">Nacionalidad</label><div class="form-input" id="bk_nacionalidad" style="display:flex;align-items:center;color:var(--text2);font-size:0.85rem;min-height:36px">—</div><input type="hidden" id="bk_nacionalidad_val"></div><div style="grid-column:1/-1"><label class="form-label">Notas (confirmación, pedidos)</label><input class="form-input" id="bk_notas"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('modalBooking')">Cancelar</button>
+      <button id="bkBtnGuardar" class="btn btn-gold" onclick="bookingGuardar()" style="display:none">✓ Crear reserva temporal</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+
