@@ -3598,6 +3598,24 @@ function filterAgenda(f, btn) {
   agendaFilter = f;
   document.querySelectorAll(".agenda-filter-tabs .tab").forEach(t => t.classList.remove("active"));
   btn.classList.add("active");
+  // Sync mobile filter buttons
+  document.querySelectorAll(".ag-filter-btn").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".ag-filter-btn").forEach(t => {
+    if(t.getAttribute("onclick") && t.getAttribute("onclick").includes("'"+f+"'")) t.classList.add("active");
+  });
+  renderAgenda();
+}
+
+// Mobile agenda filter buttons — syncs with desktop tabs
+function filterAgendaBtn(f, btn) {
+  agendaFilter = f;
+  document.querySelectorAll(".ag-filter-btn").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  // Sync desktop tabs
+  document.querySelectorAll(".agenda-filter-tabs .tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".agenda-filter-tabs .tab").forEach(t => {
+    if(t.getAttribute("onclick") && t.getAttribute("onclick").includes("'"+f+"'")) t.classList.add("active");
+  });
   renderAgenda();
 }
 

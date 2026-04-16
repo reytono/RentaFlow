@@ -2459,3 +2459,359 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   transition: opacity 0.1s;
 }
 .date-clear-btn:hover { opacity: 1; }
+
+
+/* ══════════════════════════════════════════════════════════
+   HEADER REFACTOR v2.5
+   ══════════════════════════════════════════════════════════ */
+
+/* Layout base del header — mismo comportamiento que antes */
+header {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12,11,9,0.92);
+  transition: background 0.3s;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  gap: 16px;
+}
+
+.header-top-row {
+  display: contents; /* En desktop se comporta como si no existiera el wrapper */
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.header-brand-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Botón modo: desktop muestra ícono + texto */
+#btnModo {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Texto corto/largo de la primera tab */
+.nav-tab-short { display: none; }
+.nav-tab-full  { display: inline; }
+
+/* ── MOBILE HEADER ── */
+@media (max-width: 600px) {
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+  }
+
+  /* Fila superior: logo + acciones */
+  .header-top-row {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .header-brand { flex-direction: row; align-items: center; gap: 8px; }
+  .header-brand-meta { gap: 4px; }
+  .logo { font-size: 1.1rem; }
+  #fechaHoy { font-size: 0.62rem; }
+  #buildStampWrap { display: none !important; }
+
+  /* header-actions en la misma fila del logo */
+  .header-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  /* Modo: solo ícono en mobile */
+  #btnModo .modo-label-text { display: none !important; }
+  #btnModo {
+    width: 36px; height: 36px;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.05rem;
+  }
+
+  /* Botón Departamento oculto en mobile */
+  .header-btn-depto { display: none !important; }
+
+  /* Botón Reserva compacto */
+  .header-actions .btn-gold {
+    padding: 7px 13px;
+    font-size: 0.78rem;
+  }
+
+  /* Fila nav: debajo del todo */
+  header .nav-tabs {
+    display: flex !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: var(--bg2);
+    border: none;
+    border-top: 1px solid var(--border);
+    padding: 4px 10px 4px;
+    gap: 2px;
+    width: 100%;
+    border-radius: 0;
+  }
+  header .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    padding: 5px 10px;
+    font-size: 0.73rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    gap: 0;
+  }
+  .nav-tab svg { display: none; }
+
+  /* "Departamentos" → "Deptos" en mobile */
+  .nav-tab-full  { display: none; }
+  .nav-tab-short { display: inline; }
+
+  #fechaHoy, #buildStampWrap { display: none !important; }
+}
+
+@media (max-width: 380px) {
+  .nav-tab { padding: 5px 7px; font-size: 0.68rem; }
+  .header-actions .btn-gold { padding: 6px 10px; font-size: 0.72rem; }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   AGENDA REDISEÑO MOBILE v2.5
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Barra mes ── */
+.ag-month-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.ag-month-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.ag-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.72rem;
+  margin-top: 2px;
+  justify-content: center;
+}
+
+.ag-hoy-btn { flex-shrink: 0; }
+
+/* ── Acciones desktop ── */
+.ag-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.ag-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ag-action-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+.ag-action-btn.ag-action-gold {
+  background: var(--gold);
+  color: #0c0b09;
+  border-color: transparent;
+  font-weight: 700;
+}
+.ag-action-btn.ag-action-gold:hover { background: var(--gold2); }
+
+/* Filtros inline en ag-actions (mobile solamente, en desktop están en ag-filters-desktop) */
+.ag-filters-inline {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.ag-filter-btn {
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ag-filter-btn:hover { color: var(--text2); border-color: var(--border2); }
+.ag-filter-btn.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(201,150,61,0.4); }
+
+/* En desktop: los filtros standalone se muestran */
+.ag-filters-desktop { margin-bottom: 14px; }
+
+/* ── MOBILE AGENDA ── */
+@media (max-width: 600px) {
+  .agenda-wrap { padding: 12px 12px; }
+
+  /* Barra mes: más compacta */
+  .ag-month-bar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .ag-month-center {
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+  .ag-legend { display: none; } /* Ocultar leyenda en mobile — ocupa demasiado */
+  .month-label { font-size: 0.95rem; min-width: 0; }
+  .ag-hoy-btn { padding: 5px 10px; font-size: 0.72rem; }
+
+  /* Acciones: grilla 2 columnas */
+  .ag-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .ag-action-btn {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
+
+  /* Filtros inline visibles en mobile, ocupan fila completa */
+  .ag-filters-inline {
+    display: flex !important;
+    grid-column: 1 / -1;
+    justify-content: stretch;
+    gap: 6px;
+    margin-left: 0;
+  }
+  .ag-filter-btn { flex: 1; text-align: center; padding: 7px 6px; font-size: 0.72rem; }
+
+  /* Filtros desktop: ocultos en mobile */
+  .ag-filters-desktop { display: none !important; }
+
+  /* Resumen del mes: 2 por fila */
+  .month-summary { flex-wrap: wrap; }
+  .ms-item { flex: 1 1 calc(50% - 1px); padding: 10px 12px; }
+  .ms-val { font-size: 1rem; }
+  .ms-lbl { font-size: 0.6rem; }
+
+  /* Filas de eventos: rediseñadas para mobile */
+  .day-header {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .day-divider { display: none; }
+  .day-num { font-size: 1.5rem; }
+  .day-events-summary { flex-wrap: wrap; gap: 5px; }
+
+  .event-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .event-row:last-child { border-bottom: none; }
+
+  /* Primera línea: badge tipo + depto + estado */
+  .event-row > .event-type-badge { order: 1; align-self: flex-start; }
+  .event-row > .event-apto { order: 2; font-size: 0.82rem; }
+  .event-row > .event-huesped { order: 3; font-size: 0.88rem; font-weight: 600; }
+  .event-row > .event-monto { order: 4; font-size: 0.88rem; }
+  .event-row > .event-horario-box { order: 5; max-width: 100%; }
+  .event-row > .event-detail { order: 6; font-size: 0.7rem; }
+  .event-row > .event-estado { order: 7; align-self: flex-start; }
+}
+
+@media (max-width: 400px) {
+  .ag-actions { grid-template-columns: 1fr; }
+  .ag-filters-inline { grid-column: 1; }
+  .ag-action-btn { font-size: 0.78rem; padding: 9px 10px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   DEPARTAMENTOS: tarjetas mobile sin desborde
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Una sola tarjeta por vez, casi full width */
+  .apartments-grid:not(.zoom-mode) .apt-card {
+    width: calc(100vw - 32px) !important;
+    min-width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+  /* Reducir padding lateral del grid */
+  .apartments-grid {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    scroll-padding-left: 16px !important;
+    scroll-padding-right: 16px !important;
+    gap: 12px !important;
+  }
+  .grid-end-spacer {
+    flex-basis: 16px !important;
+    width: 16px !important;
+    min-width: 16px !important;
+  }
+  /* Mini zoom: 2 tarjetas visibles */
+  .apartments-grid.mini-zoom .apt-card {
+    width: calc(50vw - 22px) !important;
+    min-width: calc(50vw - 22px) !important;
+    max-width: calc(50vw - 22px) !important;
+  }
+}
