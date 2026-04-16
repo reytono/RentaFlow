@@ -57,7 +57,7 @@
 <nav class="nav-tabs">
 <button class="nav-tab active" id="navDeptos" onclick="switchPage('deptos', this)">
 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-<span class="nav-tab-full">Departamentos</span><span class="nav-tab-short" style="display:none">Deptos</span>
+<span class="nav-tab-full">Departamentos</span><span class="nav-tab-short">Deptos</span>
 </button>
 <button class="nav-tab" id="navAgenda" onclick="switchPage('agenda', this)">
 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -89,10 +89,12 @@ Temp
 <div class="section-header">
 <div id="deptoHeaderRow" style="display:flex;align-items:center;gap:10px">
 <div class="section-title">Departamentos</div>
-<button class="btn btn-ghost btn-sm" onclick="abrirModalNota()" style="font-size:0.78rem;display:flex;align-items:center;gap:5px">
+<!-- N+ / + Nota -->
+<button class="btn btn-ghost btn-sm" onclick="abrirModalNota()" style="font-size:0.78rem;display:flex;align-items:center;gap:5px" title="Agregar nota">
 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-+ Nota
+<span class="btn-nota-full">+ Nota</span><span class="btn-nota-short">N+</span>
 </button>
+<!-- Filtro usuario -->
 <div style="position:relative">
 <button class="btn btn-ghost btn-sm" id="btnFiltroUsuario" onclick="toggleFiltroUsuario()" style="font-size:0.78rem;display:flex;align-items:center;gap:5px">
 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -100,22 +102,26 @@ Temp
 </button>
 <div id="filtroUsuarioMenu" style="display:none;position:absolute;left:0;top:110%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:200;padding:6px"></div>
 </div>
+<!-- Buscador -->
 <div id="buscarDeptoWrap" class="search-input-wrap">
 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:9px;color:var(--text3);pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-<input id="buscarDepto" type="text" placeholder="Buscar por texto…"
+<input id="buscarDepto" type="text" placeholder="Buscar…"
 oninput="persistDeptoFilters();renderGrid();document.getElementById('buscarDeptoX').style.display=this.value?'block':'none'"
 style="padding:5px 28px 5px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.78rem;outline:none;transition:border-color 0.15s;width:100%"
 onfocus="this.style.borderColor='var(--border2)'" onblur="this.style.borderColor='var(--border)'">
 <button onclick="document.getElementById('buscarDepto').value='';persistDeptoFilters();renderGrid();this.style.display='none'" style="position:absolute;right:7px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:0.75rem;padding:2px;line-height:1;display:none" id="buscarDeptoX" title="Limpiar">✕</button>
 </div>
+<!-- Pendientes -->
 <button id="btnPendientes" onclick="abrirPendientes()" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:6px;font-size:0.78rem" title="Ver pendientes">
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <span class="btn-label-desktop">Pendientes</span><span class="btn-label-mobile" style="display:none">P</span>
 </button>
-<button class="btn btn-ghost btn-sm depto-desktop-only" onclick="switchPage('temp',document.getElementById('navTemp'));setTimeout(function(){var p=document.getElementById('libresPanel');if(p){p.style.display='block';var d=document.getElementById('libresDesde');var h=document.getElementById('libresHasta');var t=new Date();var pad=function(n){return String(n).padStart(2,'0')};if(d&&!d.value)d.value=t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());if(h&&!h.value){var tm=new Date(t);tm.setDate(tm.getDate()+1);h.value=tm.getFullYear()+'-'+pad(tm.getMonth()+1)+'-'+pad(tm.getDate());}}},200)" style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:#7ab0eb;border-color:rgba(74,133,190,0.28);background:rgba(74,133,190,0.08)" title="Buscar departamentos libres">
+<!-- Libres: visible en mobile como "L", desktop como "Libres" -->
+<button class="btn btn-ghost btn-sm btn-libres-mobile" onclick="switchPage('temp',document.getElementById('navTemp'));setTimeout(function(){var p=document.getElementById('libresPanel');if(p){p.style.display='block';var d=document.getElementById('libresDesde');var h=document.getElementById('libresHasta');var t=new Date();var pad=function(n){return String(n).padStart(2,'0')};if(d&&!d.value)d.value=t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());if(h&&!h.value){var tm=new Date(t);tm.setDate(tm.getDate()+1);h.value=tm.getFullYear()+'-'+pad(tm.getMonth()+1)+'-'+pad(tm.getDate());}}},200)" style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:#7ab0eb;border-color:rgba(74,133,190,0.28);background:rgba(74,133,190,0.08)" title="Buscar departamentos libres">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-  Libres
+  <span class="btn-libres-full">Libres</span><span class="btn-libres-short">L</span>
 </button>
+<!-- Booking: solo desktop -->
 <button class="btn btn-ghost btn-sm depto-desktop-only" onclick="switchPage('temp',document.getElementById('navTemp'));setTimeout(function(){openModal('modalBooking');},200)" style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:#b07ee8;border-color:rgba(146,95,224,0.28);background:rgba(146,95,224,0.08)" title="Importar de Booking">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
   Booking

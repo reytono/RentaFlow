@@ -2815,3 +2815,167 @@ header {
     max-width: calc(50vw - 22px) !important;
   }
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   FIX DEFINITIVO MOBILE — máxima especificidad
+   ══════════════════════════════════════════════════════════ */
+
+/* Nav tab: "Deptos" vs "Departamentos" */
+.nav-tab-full  { display: inline; }
+.nav-tab-short { display: none;   }
+
+/* Tarjetas: 1 por vez en mobile, sin padding lateral grande */
+@media screen and (max-width: 600px) {
+  .nav-tab-full  { display: none   !important; }
+  .nav-tab-short { display: inline !important; }
+
+  #aptsViewport .apartments-grid,
+  .apartments-viewport .apartments-grid,
+  .apartments-grid {
+    padding-left:  16px !important;
+    padding-right: 16px !important;
+    scroll-padding-left:  16px !important;
+    scroll-padding-right: 16px !important;
+    gap: 12px !important;
+  }
+
+  #aptsViewport .apartments-grid:not(.zoom-mode) .apt-card,
+  .apartments-viewport .apartments-grid:not(.zoom-mode) .apt-card,
+  .apartments-grid:not(.zoom-mode) .apt-card {
+    width:     calc(100vw - 32px) !important;
+    min-width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    flex:      0 0 calc(100vw - 32px) !important;
+  }
+
+  .grid-end-spacer {
+    width:     16px !important;
+    min-width: 16px !important;
+    flex-basis: 16px !important;
+  }
+
+  /* mini-zoom: 2 tarjetas por pantalla */
+  .apartments-grid.mini-zoom .apt-card,
+  .apartments-grid.mini-zoom:not(.zoom-mode) .apt-card {
+    width:     calc(50vw - 20px) !important;
+    min-width: calc(50vw - 20px) !important;
+    max-width: calc(50vw - 20px) !important;
+    flex:      0 0 calc(50vw - 20px) !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   FIX DEPTOS HEADER + CARDS — mobile
+   ══════════════════════════════════════════════════════════ */
+
+/* Desktop: versiones largas visibles, cortas ocultas */
+.btn-nota-short  { display: none; }
+.btn-nota-full   { display: inline; }
+.btn-libres-short { display: none; }
+.btn-libres-full  { display: inline; }
+/* Libres visible en desktop también (quitamos depto-desktop-only) */
+.btn-libres-mobile { display: flex !important; }
+
+@media screen and (max-width: 600px) {
+  /* ── Toolbar deptos ── */
+  #deptoHeaderRow {
+    gap: 5px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  /* Ocultar título "Departamentos" */
+  #deptoHeaderRow .section-title { display: none !important; }
+
+  /* Botones: compactos */
+  #deptoHeaderRow .btn { 
+    padding: 5px 8px !important; 
+    font-size: 0.72rem !important;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  /* Ocultar íconos SVG en los botones de la toolbar */
+  #deptoHeaderRow .btn svg { display: none !important; }
+
+  /* N+ en mobile, "Nota" oculto */
+  .btn-nota-full  { display: none !important; }
+  .btn-nota-short { display: inline !important; }
+
+  /* L en mobile, "Libres" oculto */
+  .btn-libres-full  { display: none !important; }
+  .btn-libres-short { display: inline !important; }
+
+  /* Ocultar "Filtrar por usuario" label, dejar solo ícono → ya manejado antes */
+  #btnFiltroUsuario #filtroUsuarioLabel { display: none !important; }
+  #btnFiltroUsuario svg { display: inline !important; }
+
+  /* "P" en Pendientes */
+  .btn-label-desktop { display: none !important; }
+  .btn-label-mobile  { display: inline !important; }
+
+  /* Buscar: flex restante pero con min-width pequeño */
+  #buscarDeptoWrap {
+    flex: 1 1 0 !important;
+    min-width: 50px !important;
+    max-width: none !important;
+  }
+
+  /* ── Tarjetas: 1 por vez, alineada al borde izquierdo ── */
+  .apartments-viewport {
+    padding: 0 !important;
+  }
+  #aptsViewport .apartments-grid,
+  .apartments-viewport .apartments-grid,
+  .apartments-grid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    scroll-padding-left: 10px !important;
+    scroll-padding-right: 10px !important;
+    gap: 10px !important;
+  }
+  #aptsViewport .apartments-grid:not(.zoom-mode) .apt-card,
+  .apartments-viewport .apartments-grid:not(.zoom-mode) .apt-card,
+  .apartments-grid:not(.zoom-mode) .apt-card {
+    width:     calc(100vw - 20px) !important;
+    min-width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    flex:      0 0 calc(100vw - 20px) !important;
+  }
+  .grid-end-spacer {
+    width: 10px !important; min-width: 10px !important; flex-basis: 10px !important;
+  }
+
+  /* mini-zoom: 2 tarjetas */
+  .apartments-grid.mini-zoom .apt-card,
+  .apartments-grid.mini-zoom:not(.zoom-mode) .apt-card {
+    width:     calc(50vw - 15px) !important;
+    min-width: calc(50vw - 15px) !important;
+    max-width: calc(50vw - 15px) !important;
+    flex:      0 0 calc(50vw - 15px) !important;
+  }
+
+  /* ── Compactar espacio dentro de cada card ── */
+  .apt-header { padding: 8px 10px 6px !important; }
+  .apt-body, .reservas-section { padding: 4px 8px 4px !important; }
+  .reserva-item { padding: 7px 8px 7px 0 !important; margin-bottom: 6px !important; }
+  .apt-footer { padding: 5px 8px !important; }
+  .apt-actions { gap: 5px !important; }
+
+  /* Reducir gap entre info y botones dentro de la reserva */
+  .reserva-right {
+    width: 80px !important;
+    gap: 3px !important;
+  }
+  .reserva-right .reserva-pill,
+  .reserva-right .pago-btn,
+  .reserva-right .ingreso-btn {
+    width: 100% !important;
+    font-size: 0.52rem !important;
+    padding: 3px 4px !important;
+  }
+}
